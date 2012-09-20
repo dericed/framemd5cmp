@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# Author: Dave Rice <dave@dericed.com> and Bay Area Video Coalition <bavc.org>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+NUM_ARGS=2
+VERSION=0.1
+OUTPUT_DIR=.
+
+output_help()
+{
+   cat <<Endofmessage
+Version: framemd5cmp $VERSION
+
+Usage: framemd5cmp file1 file2
+
+Dependencies: ffmpeg and diff
+
+Description: This script will evaluate two video files and identify descrepencies between their frames. It will only show where frames between the two files do not decode to exactly equal data.
+
+Endofmessage
+}
+
+if [ ! "$#" -eq $NUM_ARGS ] ; then
+   output_help
+   exit 1
+fi
+
+if [ ! -s "$1" -o ! -s "$2" ] ; then
+   output_help
+   exit 1
+fi
+NAME1=`basename "$1"`
+NAME2=`basename "$2"`
+PARENT1=`basename $(dirname "$1")`
+PARENT2=`basename $(dirname "$2")`
+FRAMEMD5_1="${OUTPUT_DIR}/${NAME1%.*}_${PARENT1}_framemd5.txt"
+FRAMEMD5_2="${OUTPUT_DIR}/${NAME2%.*}_${PARENT2}_framemd5.txt"
+FRAMEMD5_HASHONLY_1="${OUTPUT_DIR}/${NAME1%.*}_${PARENT1}_hashonly.txt"
+FRAMEMD5_HASHONLY_2="${OUTPUT_DIR}/${NAME2%.*}_${PARENT2}_hashonly.txt"
+ffmpeg -n -i "$1" -an -map 0:v:0 -f framemd5 "$FRAMEMD5_1"
+ffmpeg -n -i "$2" -an -map 0:v:0 -f framemd5 "$FRAMEMD5_2"
+cut -d, -f6 "$FRAMEMD5_1" | sed 's/ //g' | tail -n +2 > "$FRAMEMD5_HASHONLY_1"
+cut -d, -f6 "$FRAMEMD5_2" | sed 's/ //g' | tail -n +2 > "$FRAMEMD5_HASHONLY_2"
+diff -u "$FRAMEMD5_HASHONLY_1" "$FRAMEMD5_HASHONLY_2" > "${OUTPUT_DIR}/${NAME1%.*}_${PARENT1}_vs_${NAME2%.*}_${PARENT2}_diff.txt"
