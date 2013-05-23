@@ -1,0 +1,65 @@
+#!/bin/bash
+# makeframemd5
+
+version="1.0"
+
+cleanup(){
+    log -a "Process aborted"
+    exit 1
+}
+
+trap cleanup SIGHUP SIGINT SIGTERM
+
+usage(){
+    echo
+    echo "$(basename $0) ${version}"
+    echo "This script may be run interactively by running it with no arguments or may be used with the following options."
+    echo "Usage: $(basename $0) [ -i input ] [ -d ] [ -c ] [ -f ]"
+    echo "  -h Show this 'help'."
+    echo "  -d Decode video frames prior to checksuming."
+    echo "  -c Copy video frames to checksum utility"
+    echo "  -f (experimental) Fingerprint video frames by filter frames to "
+    exit
+}
+
+unset framemd5opts
+while getopts ":i:dcf" opt; do
+    case "$opt" in
+        i)  input="$OPTARG"
+            [ -d "$input" ] && { outputdir="$input/metadata/submissionDocumentation/framemd5" && logdir="$input/metadata/submissionDocumentation/framemd5/logs" ;};
+            [ -f "$input" ] && { outputdir=`dirname "$input"`"/framemd5" && logdir="`dirname "$input"`/framemd5/logs" ;}; ;;
+        h)  usage ;;
+        d)  outputname="$outputdir"/$(basename "${input%.*}_framemd5.md5")
+            if [ ! -f "$outputname" ] ; then
+                framemd5opts+=(-f framemd5 -an "$outputname")
+            else
+                echo "$outputname already exists skipping."
+            fi ;;
+        c)  outputname="$outputdir"/$(basename "${input%.*}_codec_copy_framemd5.md5")
+            if [ ! -f "$outputname" ] ; then
+                framemd5opts+=(-c copy -an -f framemd5 "$outputname")
+            else
+                echo "$outputname already exists skipping."
+            fi ;;
+        f)  outputname="$outputdir"/$(basename "${input%.*}_monow_sqcif_framemd5.md5")
+            if [ ! -f "$outputname" ] ; then
+                framemd5opts+=(-vf format=monow,scale=40:30 -an -f framemd5 "$outputname")
+            else
+                echo "$outputname already exists skipping."
+            fi ;;
+        \?) echo "Invalid option: -$OPTARG" ; exit 1 ;;
+        :) echo "Option -$OPTARG requires an argument" ; exit 1 ;;
+    esac
+done
+shift $(( ${OPTIND} - 1 ))
+[ "${input}" = "" ] && { echo -e "An input must be given as in\n  $(basename $0) [ -i input ]" ; exit 1 ;};
+echo "M ${framemd5opts[@]} M"
+[ "${framemd5opts[@]}" -eq "" ] && framemd5opts+=(-f framemd5 -an "$outputname")
+mkdir -p "${outputdir}"
+if [ "${logdir}" != "" ] ; then
+    mkdir -p "${logdir}"
+    export FFREPORT="file=${logdir}/$(basename ${input%.*})_%p_%t_$(basename $0)_${version}.txt"
+    inputoptions+=(-vsync passthrough -v warning -stats)
+fi
+echo "Running: ffmpeg ${inputoptions[@]} -i ${input} ${framemd5opts[@]}"
+ffmpeg ${inputoptions[@]} -i ${input} ${framemd5opts[@]}
