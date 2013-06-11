@@ -1,4 +1,4 @@
-Description: framemd5cmp bash script
+Description: framemd5cmp shell script
 ========================
 
 This script will evaluate two video files and identify discrepancies between their frames. It will only show where frames between the two files do not decode to exactly equal data. It is given the checksum of the decoded frame, not the stored data of the frame [this aspect will be updated in future instances of the script]
