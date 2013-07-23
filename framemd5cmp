@@ -91,7 +91,7 @@ if [ "${NAME1}" == "${NAME2}" ] ; then
     NAME2="${NAME2}_2"
 fi
 FRAMEMD5_1="${OUTPUT_DIR}/${NAME1}_framemd5.txt"
-FRAMEMD5_2="${OUTPUT_DIR}/${NAME2}__framemd5.txt"
+FRAMEMD5_2="${OUTPUT_DIR}/${NAME2}_framemd5.txt"
 FRAMEMD5_HASHONLY_1="${OUTPUT_DIR}/${NAME1}_hashonly.txt"
 FRAMEMD5_HASHONLY_2="${OUTPUT_DIR}/${NAME2}_hashonly.txt"
 ffmpeg -n -i "$1" -an -map 0:v:0 -f framemd5 "${FRAMEMD5_1}"
