@@ -2,6 +2,8 @@
 # makeframemd5
 
 version="1.0"
+unset dependencies
+dependencies=(ffmpeg ffprobe)
 
 cleanup(){
     log -a "Process aborted"
@@ -21,6 +23,31 @@ usage(){
     echo "  -f (experimental) Fingerprint video frames by filter frames to "
     exit
 }
+
+check_dependencies(){
+    deps_ok=YES
+    while [ "$*" != "" ] ; do
+        dependency="$1"
+        if [ ! $(which $dependency) ] ; then
+            echo "This script requires $dependency to run but it is not installed"
+            echo "If you are running ubuntu or debian you might be able to install $dependency with the following command"
+            echo "sudo apt-get install ${dependency}"
+            echo "If you are running mac you might be able to install $dependency with the following command"
+            echo "brew install ${dependency}"
+            deps_ok=NO
+        fi
+        shift
+    done
+    if [[ "$deps_ok" == "NO" ]]; then
+        echo "Unmet dependencies"
+        echo "Aborting!"
+        exit 1
+    else
+    return 0
+    fi
+}
+
+check_dependencies "${dependencies[@]}"
 
 unset framemd5opts
 while getopts ":i:dcf" opt; do
@@ -53,8 +80,12 @@ while getopts ":i:dcf" opt; do
 done
 shift $(( ${OPTIND} - 1 ))
 [ "${input}" = "" ] && { echo -e "An input must be given as in\n  $(basename $0) [ -i input ]" ; exit 1 ;};
-echo "M ${framemd5opts[@]} M"
-[ "${framemd5opts[@]}" -eq "" ] && framemd5opts+=(-f framemd5 -an "$outputname")
+
+if [[ "${framemd5opts}" -eq "" ]] ; then
+    outputname="$outputdir"/$(basename "${input%.*}_framemd5.md5")
+    framemd5opts+=(-f framemd5 -an "$outputname")
+fi
+
 mkdir -p "${outputdir}"
 if [ "${logdir}" != "" ] ; then
     mkdir -p "${logdir}"
