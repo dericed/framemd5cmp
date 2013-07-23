@@ -80,6 +80,7 @@ while getopts ":i:dcf" opt; do
 done
 shift $(( ${OPTIND} - 1 ))
 [ "${input}" = "" ] && { echo -e "An input must be given as in\n  $(basename $0) [ -i input ]" ; exit 1 ;};
+[ ! -f "$input" ] && { echo "Sorry, the input must be a file (for now)." ; exit 1 ;};
 
 if [[ "${framemd5opts}" -eq "" ]] ; then
     outputname="$outputdir"/$(basename "${input%.*}_framemd5.md5")
