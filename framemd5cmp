@@ -38,6 +38,12 @@ if [ ! -s "${1}" -o ! -s "${2}" ] ; then
     echo "Error: ${1} and ${2} must be files."
     usage
 fi
+
+if [ "${1}" == "${2}" ] ; then
+    echo "Error: ${1} and ${2} are the same file."
+    usage
+fi
+
 NAME1=$(basename "${1}")
 NAME2=$(basename "${2}")
 PARENT1=$(basename $(dirname "${1}"))
