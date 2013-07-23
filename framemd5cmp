@@ -16,28 +16,24 @@ NUM_ARGS=2
 VERSION=0.1
 OUTPUT_DIR=.
 
-output_help()
+usage()
 {
-   cat <<Endofmessage
-Version: framemd5cmp $VERSION
-
-Usage: framemd5cmp file1 file2
-
-Dependencies: ffmpeg and diff
-
-Description: This script will evaluate two video files and identify descrepencies between their frames. It will only show where frames between the two files do not decode to exactly equal data.
-
-Endofmessage
+    echo
+    echo "Version: framemd5cmp $VERSION"
+    echo "Usage: framemd5cmp file1 file2"
+    echo
+    echo "Dependencies: ffmpeg and diff"
+    echo "Description: This script will evaluate two video files and identify descrepencies between their frames. It will only show where frames between the two files do not decode to exactly equal data."
+    echo
+    exit
 }
 
 if [ ! "$#" -eq $NUM_ARGS ] ; then
-   output_help
-   exit 1
+    usage
 fi
 
 if [ ! -s "$1" -o ! -s "$2" ] ; then
-   output_help
-   exit 1
+    usage
 fi
 NAME1=`basename "$1"`
 NAME2=`basename "$2"`
