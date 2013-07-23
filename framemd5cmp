@@ -19,7 +19,7 @@ OUTPUT_DIR=.
 usage()
 {
     echo
-    echo "Version: framemd5cmp $VERSION"
+    echo "Version: framemd5cmp ${VERSION}"
     echo "Usage: framemd5cmp file1 file2"
     echo
     echo "Dependencies: ffmpeg and diff"
@@ -28,23 +28,23 @@ usage()
     exit
 }
 
-if [ ! "$#" -eq $NUM_ARGS ] ; then
+if [ ! "${#}" -eq "${NUM_ARGS}" ] ; then
     usage
 fi
 
-if [ ! -s "$1" -o ! -s "$2" ] ; then
+if [ ! -s "${1}" -o ! -s "${2}" ] ; then
     usage
 fi
-NAME1=`basename "$1"`
-NAME2=`basename "$2"`
-PARENT1=`basename $(dirname "$1")`
-PARENT2=`basename $(dirname "$2")`
+NAME1=$(basename "${1}")
+NAME2=$(basename "${2}")
+PARENT1=$(basename $(dirname "${1}"))
+PARENT2=$(basename $(dirname "${2}"))
 FRAMEMD5_1="${OUTPUT_DIR}/${NAME1%.*}_${PARENT1}_framemd5.txt"
 FRAMEMD5_2="${OUTPUT_DIR}/${NAME2%.*}_${PARENT2}_framemd5.txt"
 FRAMEMD5_HASHONLY_1="${OUTPUT_DIR}/${NAME1%.*}_${PARENT1}_hashonly.txt"
 FRAMEMD5_HASHONLY_2="${OUTPUT_DIR}/${NAME2%.*}_${PARENT2}_hashonly.txt"
-ffmpeg -n -i "$1" -an -map 0:v:0 -f framemd5 "$FRAMEMD5_1"
-ffmpeg -n -i "$2" -an -map 0:v:0 -f framemd5 "$FRAMEMD5_2"
-cut -d, -f6 "$FRAMEMD5_1" | sed 's/ //g' | tail -n +2 > "$FRAMEMD5_HASHONLY_1"
-cut -d, -f6 "$FRAMEMD5_2" | sed 's/ //g' | tail -n +2 > "$FRAMEMD5_HASHONLY_2"
-diff -u "$FRAMEMD5_HASHONLY_1" "$FRAMEMD5_HASHONLY_2" > "${OUTPUT_DIR}/${NAME1%.*}_${PARENT1}_vs_${NAME2%.*}_${PARENT2}_diff.txt"
+ffmpeg -n -i "$1" -an -map 0:v:0 -f framemd5 "${FRAMEMD5_1}"
+ffmpeg -n -i "$2" -an -map 0:v:0 -f framemd5 "${FRAMEMD5_2}"
+cut -d, -f6 "${FRAMEMD5_1}" | sed 's/ //g' | tail -n +2 > "${FRAMEMD5_HASHONLY_1}"
+cut -d, -f6 "${FRAMEMD5_2}" | sed 's/ //g' | tail -n +2 > "${FRAMEMD5_HASHONLY_2}"
+diff -u "${FRAMEMD5_HASHONLY_1}" "${FRAMEMD5_HASHONLY_2}" > "${OUTPUT_DIR}/${NAME1%.*}_${PARENT1}_vs_${NAME2%.*}_${PARENT2}_diff.txt"
