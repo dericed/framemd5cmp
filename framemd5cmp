@@ -13,6 +13,7 @@
 # GNU General Public License for more details.
 #
 NUM_ARGS=2
+SCRIPTNAME=$(basename "${0}")
 VERSION=0.1
 OUTPUT_DIR=.
 
@@ -29,10 +30,12 @@ usage()
 }
 
 if [ ! "${#}" -eq "${NUM_ARGS}" ] ; then
+    echo "Error: ${SCRIPTNAME} requires exactly two inputs."
     usage
 fi
 
 if [ ! -s "${1}" -o ! -s "${2}" ] ; then
+    echo "Error: ${1} and ${2} must be files."
     usage
 fi
 NAME1=$(basename "${1}")
