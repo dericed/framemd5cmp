@@ -23,10 +23,15 @@ usage()
     echo "Version: framemd5cmp ${VERSION}"
     echo "Usage: framemd5cmp file1 file2"
     echo
-    echo "Dependencies: ffmpeg and diff"
+    echo "Dependencies: ffmpeg ffprobe and diff"
     echo "Description: This script will evaluate two video files and identify descrepencies between their frames. It will only show where frames between the two files do not decode to exactly equal data."
     echo
     exit
+}
+
+is_video(){
+    # use ffmpeg's index value and stream specifier to determine if the input is a recognized as a video file by ffmpeg
+    ffprobe "$1" -show_streams -select_streams v 2> /dev/null | grep "index="
 }
 
 if [ ! "${#}" -eq "${NUM_ARGS}" ] ; then
@@ -36,6 +41,14 @@ fi
 
 if [ ! -s "${1}" -o ! -s "${2}" ] ; then
     echo "Error: ${1} and ${2} must be files."
+    usage
+fi
+
+if [ ! $(is_video "${1}") ] ; then
+    echo "Error: ${1} is not a video file (as recognized by ffmpeg)."
+    usage
+elif [ ! $(is_video "${2}") ] ; then
+    echo "Error: ${2} is not a video file (as recognized by ffmpeg)."
     usage
 fi
 
